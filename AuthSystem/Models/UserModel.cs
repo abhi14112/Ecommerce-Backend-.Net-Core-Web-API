@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-
 namespace AuthSystem.Models
 {
     public class UserModel
@@ -24,8 +23,7 @@ namespace AuthSystem.Models
 
         [Required(ErrorMessage = "Role is required.")]
         [StringLength(50, ErrorMessage = "Role cannot exceed 50 characters.")]
-        public string Role { get; set; }
-
+        public string Role { get; set; } = "customer";
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -16,6 +16,7 @@ namespace AuthSystem.Controllers
 
 
         [HttpGet("All")]
+        [Authorize]
         public IActionResult GetAllProducts()
         {
             var products = _context.Products.ToList();

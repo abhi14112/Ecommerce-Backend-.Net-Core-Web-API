@@ -7,7 +7,7 @@ namespace AuthSystem.Controllers
 {
     [Route("api/[Controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class ProfileController : ControllerBase
     {
 
         [HttpGet("Admin")]
@@ -15,14 +15,16 @@ namespace AuthSystem.Controllers
         public IActionResult AdminsEndpoint()
         {
             var currentUser = GetCurrentUser();
-            return Ok($"Hi {currentUser.UserName}, you are an {currentUser.Role}");
-        }
-        [HttpGet("Public")]
-        public IActionResult Public()
-        {
-            return Ok("Hii you are on public");
+            return Ok(currentUser);
         }
 
+        [HttpGet("Customer")]
+        [Authorize(Roles = "customer")]
+        public IActionResult UsersEndpoint()
+        {
+            var currentUser = GetCurrentUser();
+            return Ok(currentUser);
+        }
         private UserModel GetCurrentUser()
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
