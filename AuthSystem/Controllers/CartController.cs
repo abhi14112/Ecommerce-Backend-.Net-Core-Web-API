@@ -15,14 +15,43 @@ namespace AuthSystem.Controllers
             _context = context;
         }
 
+        
+
+
+        [HttpPost("RemoveFromCart/{id}")]
+        [Authorize]
+        public IActionResult RemoveFromCart(int id)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var cart = _context.Carts
+                .Include(c => c.Items)
+                .FirstOrDefault(c => c.UserId == userId);
+
+            if(cart == null)
+            {
+                return NotFound(new { message = "Cart not found." });
+            }
+            
+            var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == id);
+
+            if (cartItem == null)
+            {
+                return NotFound(new { message = "Product not found in cart." });
+            }
+
+            cart.Items.Remove(cartItem);
+            _context.CartItems.Remove(cartItem);
+            _context.SaveChanges();
+            return Ok(new { message = "Product removed from cart successfully" });
+        }
+
         [HttpPost("AddToCart")]
         [Authorize]
         public IActionResult AddToCart([FromBody] AddToCartRequest request)
         {
-            
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-           
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var cart = _context.Carts
                 .Include(c => c.Items)
                 .FirstOrDefault(c => c.UserId == userId);
@@ -66,10 +95,8 @@ namespace AuthSystem.Controllers
             return Ok(new
             {
                 message = "Product added to cart successfully.",
-                cart.TotalPrice 
             });
         }
-
 
         [HttpGet("Items")]
         [Authorize]
@@ -91,14 +118,14 @@ namespace AuthSystem.Controllers
             {
                 CartItems = cart.Items.Select(i => new
                 {
-                    i.Id,
                     i.ProductId,
-                    ProductName = i.Product.ProductName,
+                    i.Product.ProductName,
                     i.Quantity,
                     i.Product.Price,
-                    i.TotalPrice
-                }),
-                TotalCartPrice = cart.TotalPrice
+                    i.Product.Image,
+                    i.Product.Description,
+                    i.Product.Category
+                })
             });
         }
     }

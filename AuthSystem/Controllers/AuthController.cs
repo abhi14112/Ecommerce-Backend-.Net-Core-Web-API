@@ -81,7 +81,7 @@ public class AuthController : ControllerBase
             return Ok(new
             {
                 message = "Sign Up Successful",
-                token = token,  // Return token in response
+                token = token,  // Return token 
                 user = user
             });
         }

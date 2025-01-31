@@ -14,8 +14,5 @@ namespace AuthSystem.Models
 
         public ICollection<CartItem> Items { get; set; }
 
-        [NotMapped]
-        public decimal TotalPrice => Items != null ? Items.Sum(i => i.TotalPrice) : 0;
-
     }
 }
