@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using AuthSystem.Data;
 using AuthSystem.Models;
+using static System.Net.WebRequestMethods;
 namespace AuthSystem.Controllers
 {
 
@@ -14,7 +16,6 @@ namespace AuthSystem.Controllers
             _context = context;
         }
 
-
         [HttpGet("All")]
         [Authorize]
         public IActionResult GetAllProducts()
@@ -23,9 +24,10 @@ namespace AuthSystem.Controllers
             return Ok(products);
         }
 
+
         [HttpPost("Add")]
         [Authorize(Roles = "admin")]
-        public IActionResult AddProduct([FromBody] Product product)
+        public async Task<IActionResult> AddProduct([FromForm] Product product,IFormFile imageFile)
         {
             if(product == null)
             {
@@ -33,9 +35,27 @@ namespace AuthSystem.Controllers
             }
             try
             {
+                if(imageFile != null && imageFile.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductImages");
+
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await imageFile.CopyToAsync(stream);
+                    }
+                    product.Image =$"https://localhost:7249/ProductImages/{uniqueFileName}";
+                }
                 _context.Products.Add(product);
                 _context.SaveChanges();
-                return Ok("Product Added Successfully");
+                return Ok(new { message = "Product Added Successfully", product});
             }
             catch(Exception ex)
             {
