@@ -15,8 +15,32 @@ namespace AuthSystem.Controllers
             _context = context;
         }
 
-        
 
+        [HttpPut("UpdateQuantity/{id}")]
+        [Authorize]
+        public IActionResult UpdateQuantity(int id,[FromBody] int quantity)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var cart = _context.Carts
+                .Include(c => c.Items)
+                .FirstOrDefault(c => c.UserId == userId);
+
+            if (cart == null)
+            {
+                return NotFound(new { message = "Cart not found." });
+            }
+
+            var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == id);
+
+            if (cartItem == null)
+            {
+                return NotFound(new { message = "Product not found in cart." });
+            }
+            cartItem.Quantity = quantity;
+            _context.SaveChanges();
+
+            return Ok(new { message = "Quantity Updated" , Iquantity=quantity});
+        }
 
         [HttpPost("RemoveFromCart/{id}")]
         [Authorize]
