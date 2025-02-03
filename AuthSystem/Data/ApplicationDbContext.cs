@@ -10,20 +10,20 @@ namespace AuthSystem.Data
         {
         }
 
-        public DbSet<CartItem> CartItems { get; set; }
-        public DbSet<Cart> Carts { get; set; }
-        public DbSet<Product> Products { get; set; }
+        public DbSet<CartItemModel> CartItems { get; set; }
+        public DbSet<CartModel> Carts { get; set; }
+        public DbSet<ProductModel> Products { get; set; }
         public DbSet<UserModel> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CartItem>()
+            modelBuilder.Entity<CartItemModel>()
                 .HasOne(ci => ci.Cart)
                 .WithMany(c => c.Items)
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<CartItem>()
+            modelBuilder.Entity<CartItemModel>()
                 .HasOne(ci => ci.Product)
                 .WithMany()
                 .HasForeignKey(ci => ci.ProductId)

@@ -6,7 +6,6 @@ using AuthSystem.Models;
 using static System.Net.WebRequestMethods;
 namespace AuthSystem.Controllers
 {
-
     [Route("api/[controller]")]
     public class ProductController : ControllerBase
     {
@@ -16,7 +15,17 @@ namespace AuthSystem.Controllers
             _context = context;
         }
 
-        [HttpGet("All")]
+        [HttpGet("search/{searchkey}")]
+        [Authorize]
+        public IActionResult SearchProducts(string searchkey)
+        {
+            searchkey = searchkey.ToLower();
+            var products = _context.Products
+                            .Where(p => p.ProductName.ToLower().Contains(searchkey))
+                            .ToList();
+            return Ok(products);
+        }
+        [HttpGet]
         [Authorize]
         public IActionResult GetAllProducts()
         {
@@ -24,10 +33,43 @@ namespace AuthSystem.Controllers
             return Ok(products);
         }
 
+        [HttpGet("all/{sortBy}/{category}")]
+        [Authorize]
+        public IActionResult GetFilteredProducts(string sortBy, string category)
+        {
+            var products = _context.Products.AsQueryable();
+            if (!string.IsNullOrEmpty(category) && category.ToLower() != "all")
+            {
+                products = products.Where(p => p.Category.ToLower() == category.ToLower());
+            }
+
+            switch (sortBy.ToLower())
+            {
+                case "price-asc":
+                    products = products.OrderBy(p => p.Price);
+                    break;
+                case "price-desc":
+                    products = products.OrderByDescending(p => p.Price);
+                    break;
+                case "name-asc":
+                    products = products.OrderBy(p => p.ProductName);
+                    break;
+                case "name-desc":
+                    products = products.OrderByDescending(p => p.ProductName);
+                    break;
+                default:
+                    products = products.OrderBy(p => p.Id); // Default sorting
+                    break;
+            }
+
+            return Ok(products.ToList());
+        }
+
+
 
         [HttpPost("Add")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> AddProduct([FromForm] Product product,IFormFile imageFile)
+        public async Task<IActionResult> AddProduct([FromForm] ProductModel product,IFormFile imageFile)
         {
             if(product == null)
             {
@@ -64,7 +106,7 @@ namespace AuthSystem.Controllers
         }
         [HttpPut("Update/{id}")]
         [Authorize(Roles = "admin")]
-        public IActionResult UpdateProduct(int id, [FromBody] Product product)
+        public IActionResult UpdateProduct(int id, [FromBody] ProductModel product)
         {
             try
             {

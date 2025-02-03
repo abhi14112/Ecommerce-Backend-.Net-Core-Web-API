@@ -1,4 +1,5 @@
 ﻿using AuthSystem.Data;
+using AuthSystem.DTOs;
 using AuthSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,9 +31,9 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("Login")]
-    public IActionResult Login([FromBody] UserLogin userLogin)
+    public IActionResult Login([FromBody] LoginDTO userData)
     {
-        var user = Authenticate(userLogin);
+        var user = Authenticate(userData);
         if (user != null)
         {
             var token = Generate(user);
@@ -115,11 +116,11 @@ public class AuthController : ControllerBase
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private UserModel Authenticate(UserLogin userLogin)
+    private UserModel Authenticate(LoginDTO userData)
     {
         var currentUser = _context.Users.FirstOrDefault(o =>
-            o.UserName.ToLower() == userLogin.Username.ToLower() &&
-            o.Password == userLogin.Password);
+            o.UserName.ToLower() == userData.Username.ToLower() &&
+            o.Password == userData.Password);
 
         return currentUser;
     }

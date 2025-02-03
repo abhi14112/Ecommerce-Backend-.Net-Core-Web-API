@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 namespace AuthSystem.Models
 {
-    public class Cart
+    public class CartModel
     {
         [Key]
         public int Id { get; set; }
@@ -12,7 +12,7 @@ namespace AuthSystem.Models
         [ForeignKey("UserId")]
         public UserModel User { get; set; }
 
-        public ICollection<CartItem> Items { get; set; }
+        public ICollection<CartItemModel> Items { get; set; }
 
     }
 }

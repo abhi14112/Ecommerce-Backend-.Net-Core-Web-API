@@ -83,10 +83,10 @@ namespace AuthSystem.Controllers
             if (cart == null)
             {
                
-                cart = new Cart
+                cart = new CartModel
                 {
                     UserId = userId,
-                    Items = new List<CartItem>()
+                    Items = new List<CartItemModel>()
                 };
 
                 _context.Carts.Add(cart);
@@ -104,7 +104,7 @@ namespace AuthSystem.Controllers
             else
             {
                 
-                var newCartItem = new CartItem
+                var newCartItem = new CartItemModel
                 {
                     CartId = cart.Id,
                     ProductId = request.ProductId,
