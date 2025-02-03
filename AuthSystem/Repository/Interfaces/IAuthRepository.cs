@@ -7,7 +7,9 @@ namespace AuthSystem.Repository.Interface
     public interface IAuthRepository
     {
         Task<IActionResult> Logout();
-        Task<IActionResult> Login(LoginDTO userData);
+        Task<(UserModel, string)> Login(LoginDTO userData);
         Task<IActionResult> Signup(UserModel user);
+        Task<UserModel> Authenticate(LoginDTO userData);
+        string GenerateToken(UserModel user);
     }
 }

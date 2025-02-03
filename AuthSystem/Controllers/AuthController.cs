@@ -1,6 +1,7 @@
 ﻿using AuthSystem.Data;
 using AuthSystem.DTOs;
 using AuthSystem.Models;
+using AuthSystem.Repository.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -14,11 +15,13 @@ public class AuthController : ControllerBase
 {
     private IConfiguration _config;
     private readonly ApplicationDbContext _context;
+    public readonly IAuthRepository _authService;
 
-    public AuthController(IConfiguration config, ApplicationDbContext context)
+    public AuthController(IConfiguration config, ApplicationDbContext context,IAuthRepository authService)
     {
         _context = context;
         _config = config;
+        _authService = authService;
     }
 
     [HttpPost("Logout")]
@@ -31,23 +34,21 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("Login")]
-    public IActionResult Login([FromBody] LoginDTO userData)
+    public async Task<IActionResult> Login([FromBody] LoginDTO userData)
     {
-        var user = Authenticate(userData);
-        if (user != null)
+        var (user, token) = await _authService.Login(userData);
+        if(user!=null)
         {
-            var token = Generate(user);
             user.Password = "";
             return Ok(new
             {
                 message = "Login successful",
-                token = token,  // Return token in response
+                token = token,
                 user = user
             });
         }
         return NotFound("User not found");
     }
-
     [AllowAnonymous]
     [HttpPost("Signup")]
     public IActionResult Signup([FromBody] UserModel user)
