@@ -1,23 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using AuthSystem.Data;
 using AuthSystem.Models;
-using static System.Net.WebRequestMethods;
 using AuthSystem.Repository.Interface;
 namespace AuthSystem.Controllers
 {
     [Route("api/[controller]")]
     public class ProductController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IProductRepository _productService;
         public ProductController(ApplicationDbContext context,IProductRepository productService)
         {
             _productService = productService;
-            _context = context;
         }
-
         [HttpGet("search/{searchkey}")]
         [Authorize]
         public IActionResult SearchProducts(string searchkey)
@@ -37,35 +32,9 @@ namespace AuthSystem.Controllers
         [Authorize]
         public IActionResult GetFilteredProducts(string sortBy, string category)
         {
-            var products = _context.Products.AsQueryable();
-            if (!string.IsNullOrEmpty(category) && category.ToLower() != "all")
-            {
-                products = products.Where(p => p.Category.ToLower() == category.ToLower());
-            }
-
-            switch (sortBy.ToLower())
-            {
-                case "price-asc":
-                    products = products.OrderBy(p => p.Price);
-                    break;
-                case "price-desc":
-                    products = products.OrderByDescending(p => p.Price);
-                    break;
-                case "name-asc":
-                    products = products.OrderBy(p => p.ProductName);
-                    break;
-                case "name-desc":
-                    products = products.OrderByDescending(p => p.ProductName);
-                    break;
-                default:
-                    products = products.OrderBy(p => p.Id); // Default sorting
-                    break;
-            }
-
-            return Ok(products.ToList());
+            var products = _productService.GetFilteredProducts(sortBy, category);
+            return Ok(products);
         }
-
-
 
         [HttpPost("Add")]
         [Authorize(Roles = "admin")]
@@ -95,8 +64,8 @@ namespace AuthSystem.Controllers
                     }
                     product.Image =$"https://localhost:7249/ProductImages/{uniqueFileName}";
                 }
-                _context.Products.Add(product);
-                _context.SaveChanges();
+                await _productService.AddProductAsync(product);
+                await _productService.SaveChangesAsync();
                 return Ok(new { message = "Product Added Successfully", product});
             }
             catch(Exception ex)
@@ -106,11 +75,11 @@ namespace AuthSystem.Controllers
         }
         [HttpPut("Update/{id}")]
         [Authorize(Roles = "admin")]
-        public IActionResult UpdateProduct(int id, [FromBody] ProductModel product)
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductModel product)
         {
             try
             {
-                var existingProduct = _context.Products.Find(id);
+                var existingProduct = await _productService.GetProductByIdAsync(id);
                 if(existingProduct == null)
                 {
                     return NotFound(new { Message = "Product not found" });
@@ -135,7 +104,7 @@ namespace AuthSystem.Controllers
                 {
                     existingProduct.Category = product.Category;
                 }
-                _context.SaveChanges();
+                await _productService.SaveChangesAsync();
                 return Ok(new { message = "Product Updated Successfully" });
             }
             catch(Exception ex)
@@ -144,12 +113,12 @@ namespace AuthSystem.Controllers
             }
         }
 
-        [HttpGet("Product/{id}")]
-        public IActionResult GetSingleProduct(int id)
+        [HttpGet("Item/{id}")]
+        public async Task<IActionResult> GetSingleProduct(int id)
         {
             try
             {
-                var product = _context.Products.Find(id);
+                var product = await _productService.GetProductByIdAsync(id);
                 if(product == null)
                 {
                     return NotFound(new { message = "Product Not Found" });
@@ -163,11 +132,11 @@ namespace AuthSystem.Controllers
         }
 
         [HttpGet("Category/{name}")]
-        public IActionResult ProductByCategory(string name)
+        public async Task<IActionResult> ProductByCategory(string name)
         {
             try
             {
-                var products = _context.Products.Where(p => p.Category.ToLower() == name.ToLower()).ToList();
+                var products = await _productService.GetProductsByCategoryAsync(name);
                 if (products.Count == 0)
                 {
                     return NotFound(new { message = "No Products Found" });
@@ -180,20 +149,19 @@ namespace AuthSystem.Controllers
             }
         }
 
-
         [HttpDelete("Delete/{id}")]
         [Authorize(Roles="admin")]
-        public IActionResult DeleteProduct(int id)
+        public async Task<IActionResult> DeleteProduct(int id)
         {
             try
             {
-                var product = _context.Products.Find(id);
+                var product = await _productService.GetProductByIdAsync(id);
                 if(product == null)
                 {
                     return NotFound(new { Message = "Product not found" });
                 }
-                _context.Products.Remove(product);
-                _context.SaveChanges();
+                _productService.DeleteProduct(product);
+                await _productService.SaveChangesAsync();
                 return Ok(new {message= "Product Deleted Successfully" }); 
             }
             catch(Exception ex)
