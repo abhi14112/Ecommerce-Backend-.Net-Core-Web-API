@@ -1,63 +1,57 @@
 ﻿using System.Security.Claims;
 using AuthSystem.Data;
+using AuthSystem.DTOs;
 using AuthSystem.Models;
+using AuthSystem.Repository.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 namespace AuthSystem.Controllers
 {
     [Route("api/[controller]")]
     public class CartController : ControllerBase
     {
-        public readonly ApplicationDbContext _context;
-        public CartController(ApplicationDbContext context)
+        public readonly ICartRepository _cartService;
+        public CartController(ICartRepository cartService)
         {
-            _context = context;
+            _cartService = cartService;
         }
-
 
         [HttpPut("UpdateQuantity/{id}")]
         [Authorize]
-        public IActionResult UpdateQuantity(int id,[FromBody] int quantity)
+        public async Task<IActionResult> UpdateQuantity(int id,[FromBody] int quantity)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var cart = _context.Carts
-                .Include(c => c.Items)
-                .FirstOrDefault(c => c.UserId == userId);
-
+            var cart = await _cartService.GetCartByUserIdAsync(userId);
             if (cart == null)
             {
                 return NotFound(new { message = "Cart not found." });
             }
-
-            var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == id);
-
-            if (cartItem == null)
+            var cartItem = await _cartService.GetCartItemByIdAsync(cart.Id, id);
+            if(cartItem == null)
             {
-                return NotFound(new { message = "Product not found in cart." });
+                return NotFound(new { message = "not found in cart." });
             }
-            cartItem.Quantity = quantity;
-            _context.SaveChanges();
-
-            return Ok(new { message = "Quantity Updated" , Iquantity=quantity});
+            await _cartService.UpdateCartItemQuantityAsync(cartItem, quantity);
+            await _cartService.SaveChangesAsync();
+            return Ok(new {message = "Quantity Updated",Iquantity = quantity});
         }
 
         [HttpPost("RemoveFromCart/{id}")]
         [Authorize]
-        public IActionResult RemoveFromCart(int id)
+        public async Task<IActionResult> RemoveFromCart(int id)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var cart = _context.Carts
-                .Include(c => c.Items)
-                .FirstOrDefault(c => c.UserId == userId);
+            var cart =await _cartService.GetCartByUserIdAsync(userId);
 
             if(cart == null)
             {
                 return NotFound(new { message = "Cart not found." });
             }
-            
-            var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == id);
+
+            var cartItem = await _cartService.GetCartItemByIdAsync(cart.Id, id);
 
             if (cartItem == null)
             {
@@ -65,20 +59,18 @@ namespace AuthSystem.Controllers
             }
 
             cart.Items.Remove(cartItem);
-            _context.CartItems.Remove(cartItem);
-            _context.SaveChanges();
+            await _cartService.RemoveCartItemAsync(cartItem);
+
+            await _cartService.SaveChangesAsync();
             return Ok(new { message = "Product removed from cart successfully" });
         }
 
         [HttpPost("AddToCart")]
         [Authorize]
-        public IActionResult AddToCart([FromBody] AddToCartRequest request)
+        public async Task<IActionResult> AddToCart([FromBody] QuantityDTO request)
         {
-
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var cart = _context.Carts
-                .Include(c => c.Items)
-                .FirstOrDefault(c => c.UserId == userId);
+            var cart = await _cartService.GetCartByUserIdAsync(userId);
 
             if (cart == null)
             {
@@ -88,18 +80,14 @@ namespace AuthSystem.Controllers
                     UserId = userId,
                     Items = new List<CartItemModel>()
                 };
-
-                _context.Carts.Add(cart);
-                _context.SaveChanges();
+                await _cartService.AddCartAsync(cart);
+                await _cartService.SaveChangesAsync();
             }
-
+            var cartItem = await _cartService.GetCartItemByIdAsync(cart.Id, request.ProductId);
            
-            var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == request.ProductId);
-
-            if (cartItem != null)
+            if(cartItem != null)
             {
-                
-                cartItem.Quantity += request.Quantity;
+                await _cartService.UpdateCartItemQuantityAsync(cartItem, request.Quantity);
             }
             else
             {
@@ -110,12 +98,9 @@ namespace AuthSystem.Controllers
                     ProductId = request.ProductId,
                     Quantity = request.Quantity
                 };
-                cart.Items.Add(newCartItem);
+                await _cartService.AddCartItemAsync(newCartItem);
             }
-
-           
-            _context.SaveChanges();
-
+            await _cartService.SaveChangesAsync();
             return Ok(new
             {
                 message = "Product added to cart successfully.",
@@ -124,15 +109,13 @@ namespace AuthSystem.Controllers
 
         [HttpGet("Items")]
         [Authorize]
-        public IActionResult GetCartItems()
+        public async Task<IActionResult> GetCartItems()
         {
 
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var cart = _context.Carts
-                .Include(c => c.Items)
-                .ThenInclude(i => i.Product)
-                .FirstOrDefault(c => c.UserId == userId);
+            var cart = await _cartService.GetCartByUserIdAsync(userId);
+
 
             if (cart == null || cart.Items == null || !cart.Items.Any())
             {

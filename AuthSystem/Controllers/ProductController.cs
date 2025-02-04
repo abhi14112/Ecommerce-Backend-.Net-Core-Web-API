@@ -4,14 +4,17 @@ using Microsoft.AspNetCore.Http;
 using AuthSystem.Data;
 using AuthSystem.Models;
 using static System.Net.WebRequestMethods;
+using AuthSystem.Repository.Interface;
 namespace AuthSystem.Controllers
 {
     [Route("api/[controller]")]
     public class ProductController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        public ProductController(ApplicationDbContext context)
+        private readonly IProductRepository _productService;
+        public ProductController(ApplicationDbContext context,IProductRepository productService)
         {
+            _productService = productService;
             _context = context;
         }
 
@@ -19,17 +22,14 @@ namespace AuthSystem.Controllers
         [Authorize]
         public IActionResult SearchProducts(string searchkey)
         {
-            searchkey = searchkey.ToLower();
-            var products = _context.Products
-                            .Where(p => p.ProductName.ToLower().Contains(searchkey))
-                            .ToList();
+            var products = _productService.SearchProducts(searchkey);
             return Ok(products);
         }
         [HttpGet]
         [Authorize]
-        public IActionResult GetAllProducts()
+        public async Task<IActionResult>GetAllProducts()
         {
-            var products = _context.Products.ToList();
+            var products = await _productService.GetAllProductsAsync();
             return Ok(products);
         }
 

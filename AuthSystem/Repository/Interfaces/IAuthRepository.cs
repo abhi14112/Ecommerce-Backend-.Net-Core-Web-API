@@ -6,9 +6,10 @@ namespace AuthSystem.Repository.Interface
 {
     public interface IAuthRepository
     {
-        Task<IActionResult> Logout();
         Task<(UserModel, string)> Login(LoginDTO userData);
-        Task<IActionResult> Signup(UserModel user);
+        Task<UserModel> SignupAsync(UserModel user);
+        Task<bool> UserExistsAsync(string username);
+        Task<bool>EmailExistsAsync(string email);
         Task<UserModel> Authenticate(LoginDTO userData);
         string GenerateToken(UserModel user);
     }

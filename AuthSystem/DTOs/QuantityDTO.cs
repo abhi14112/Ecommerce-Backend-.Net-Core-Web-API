@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AuthSystem.Models
+namespace AuthSystem.DTOs
 {
-    public class AddToCartRequest
+    public class QuantityDTO
     {
         [Required]
         public int ProductId { get; set; }

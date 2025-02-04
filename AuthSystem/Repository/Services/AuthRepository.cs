@@ -8,9 +8,9 @@ using AuthSystem.Repository.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-
 namespace AuthSystem.Repository.Services
 {
+
     public class AuthRepository : IAuthRepository
     {
         private readonly ApplicationDbContext _context;
@@ -20,13 +20,9 @@ namespace AuthSystem.Repository.Services
             _context = context;
             _config = config;
         }
-        public async Task<IActionResult>Logout()
+        public async Task<(UserModel, string)>Login(LoginDTO userData)
         {
-            throw new NotImplementedException();
-        }
-        public async Task<(UserModel, string)> Login(LoginDTO userData)
-        {
-            var user =await Authenticate(userData);
+            var user =  await Authenticate(userData);
             if (user != null)
             {
                 var token = GenerateToken(user);
@@ -35,9 +31,20 @@ namespace AuthSystem.Repository.Services
             }
             return (null, null);
         }
-        public Task<IActionResult> Signup(UserModel user)
+        public async Task<UserModel> SignupAsync(UserModel user)
         {
-            throw new NotImplementedException();
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+        public async Task<bool>UserExistsAsync(string usrname)
+        {
+            return await _context.Users.AnyAsync(o => o.UserName.ToLower() == usrname.ToLower());
+        }
+
+        public async Task<bool>EmailExistsAsync(string email)
+        {
+            return await _context.Users.AnyAsync(o => o.EmailAddress.ToLower() == email.ToLower());
         }
 
         public async Task<UserModel> Authenticate(LoginDTO userData)
