@@ -8,6 +8,7 @@ namespace AuthSystem.Repository.Interface
     {
         Task<(UserModel, string)> Login(LoginDTO userData);
         Task<UserModel> SignupAsync(UserModel user);
+        Task<UserModel> GetUserAsync(int id);
         Task<bool> UserExistsAsync(string username);
         Task<bool>EmailExistsAsync(string email);
         Task<UserModel> Authenticate(LoginDTO userData);

@@ -14,7 +14,7 @@ namespace AuthSystem.Data
         public DbSet<CartModel> Carts { get; set; }
         public DbSet<ProductModel> Products { get; set; }
         public DbSet<UserModel> Users { get; set; }
-
+        public DbSet<ProfileModel> Profiles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CartItemModel>()
@@ -27,6 +27,15 @@ namespace AuthSystem.Data
                 .HasOne(ci => ci.Product)
                 .WithMany()
                 .HasForeignKey(ci => ci.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProfileModel>()
+                .HasKey(p => p.userId);
+
+            modelBuilder.Entity<ProfileModel>()
+                .HasOne(p => p.User)
+                .WithOne(ci => ci.Profile)
+                .HasForeignKey<ProfileModel>(p => p.userId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);

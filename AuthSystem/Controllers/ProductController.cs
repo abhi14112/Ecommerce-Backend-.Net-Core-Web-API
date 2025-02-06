@@ -9,6 +9,7 @@ namespace AuthSystem.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _productService;
+        private readonly IProductRepository _productRepository;
         public ProductController(ApplicationDbContext context,IProductRepository productService)
         {
             _productService = productService;

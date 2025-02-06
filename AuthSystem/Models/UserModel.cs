@@ -1,11 +1,17 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 namespace AuthSystem.Models
 {
     public class UserModel
     {
         [Key]
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "FirstName is Required")]
+        public string FirstName { get; set; } = String.Empty;
+        [Required(ErrorMessage = "LastName is Required")]
+        public string LastName { get; set; } = String.Empty;
 
         [Required(ErrorMessage = "Username is required.")]
         [StringLength(100, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 100 characters.")]
@@ -29,5 +35,7 @@ namespace AuthSystem.Models
 
         [Required]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        [JsonIgnore]
+        public ProfileModel? Profile { get; set; }
     }
 }

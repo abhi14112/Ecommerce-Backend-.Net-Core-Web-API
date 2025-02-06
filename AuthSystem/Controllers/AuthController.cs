@@ -57,12 +57,7 @@ public class AuthController : ControllerBase
             var newUser = await _authService.SignupAsync(user);
             var token = _authService.GenerateToken(newUser);
             newUser.Password = "";
-            return Ok(new
-            {
-                message = "Sign Up Successful",
-                token = token,
-                user = user
-            });
+            return Ok();
         }
         catch (Exception ex)
         {

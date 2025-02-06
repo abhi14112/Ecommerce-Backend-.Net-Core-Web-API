@@ -17,7 +17,6 @@ namespace AuthSystem.Controllers
         {
             _cartService = cartService;
         }
-
         [HttpPut("UpdateQuantity/{id}")]
         [Authorize]
         public async Task<IActionResult> UpdateQuantity(int id,[FromBody] int quantity)
@@ -37,7 +36,6 @@ namespace AuthSystem.Controllers
             await _cartService.SaveChangesAsync();
             return Ok(new {message = "Quantity Updated",Iquantity = quantity});
         }
-
         [HttpPost("RemoveFromCart/{id}")]
         [Authorize]
         public async Task<IActionResult> RemoveFromCart(int id)
@@ -50,21 +48,18 @@ namespace AuthSystem.Controllers
             {
                 return NotFound(new { message = "Cart not found." });
             }
-
             var cartItem = await _cartService.GetCartItemByIdAsync(cart.Id, id);
 
             if (cartItem == null)
             {
                 return NotFound(new { message = "Product not found in cart." });
             }
-
             cart.Items.Remove(cartItem);
             await _cartService.RemoveCartItemAsync(cartItem);
 
             await _cartService.SaveChangesAsync();
             return Ok(new { message = "Product removed from cart successfully" });
         }
-
         [HttpPost("AddToCart")]
         [Authorize]
         public async Task<IActionResult> AddToCart([FromBody] QuantityDTO request)
@@ -106,16 +101,13 @@ namespace AuthSystem.Controllers
                 message = "Product added to cart successfully.",
             });
         }
-
         [HttpGet("Items")]
         [Authorize]
         public async Task<IActionResult> GetCartItems()
         {
-
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
             var cart = await _cartService.GetCartByUserIdAsync(userId);
-
 
             if (cart == null || cart.Items == null || !cart.Items.Any())
             {

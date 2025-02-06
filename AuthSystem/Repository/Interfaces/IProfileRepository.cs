@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
+﻿using AuthSystem.Models;
 namespace AuthSystem.Repository.Interface
 {
     public interface IProfileRepository
     {
-        public IActionResult GetCurrentUser();
+        Task<ProfileModel>GetProfileById(int id);
     }
 }

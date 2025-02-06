@@ -20,6 +20,10 @@ namespace AuthSystem.Repository.Services
             _context = context;
             _config = config;
         }
+        public async Task<UserModel> GetUserAsync(int id)
+        {
+            return await _context.Users.FindAsync(id);
+        }
         public async Task<(UserModel, string)>Login(LoginDTO userData)
         {
             var user =  await Authenticate(userData);
@@ -35,6 +39,15 @@ namespace AuthSystem.Repository.Services
         {
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+            var profile = new ProfileModel
+            {
+                userId = user.Id,
+                MobileNumber = string.Empty,
+                Gender = null,
+                User = user
+            };
+            _context.Profiles.Add(profile);
+            _context.SaveChanges();
             return user;
         }
         public async Task<bool>UserExistsAsync(string usrname)
