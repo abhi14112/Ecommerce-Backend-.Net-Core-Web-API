@@ -35,6 +35,10 @@ namespace AuthSystem.Repository.Services
             }
             return (null, null);
         }
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
         public async Task<UserModel> SignupAsync(UserModel user)
         {
             _context.Users.Add(user);
@@ -43,7 +47,7 @@ namespace AuthSystem.Repository.Services
             {
                 userId = user.Id,
                 MobileNumber = string.Empty,
-                Gender = null,
+                Gender = string.Empty,
                 User = user
             };
             _context.Profiles.Add(profile);

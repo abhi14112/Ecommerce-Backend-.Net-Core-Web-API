@@ -12,6 +12,7 @@ namespace AuthSystem.Repository.Interface
         Task<bool> UserExistsAsync(string username);
         Task<bool>EmailExistsAsync(string email);
         Task<UserModel> Authenticate(LoginDTO userData);
+        Task SaveChangesAsync();
         string GenerateToken(UserModel user);
     }
 }

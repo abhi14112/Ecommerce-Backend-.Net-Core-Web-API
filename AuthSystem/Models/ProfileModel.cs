@@ -5,11 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthSystem.Models
 {
-    public enum GenderEnum
-    {
-        Male,
-        Female
-    }
     public class ProfileModel
     {
         [Key]
@@ -17,7 +12,7 @@ namespace AuthSystem.Models
         [ForeignKey("UserId")]
         public int userId { get; set; }
         public string MobileNumber { get; set; } = String.Empty;
-        public GenderEnum? Gender { get; set; }
+        public string Gender { get; set; } = String.Empty;
         [JsonIgnore]
         public UserModel User { get; set; } = null!;
     }
