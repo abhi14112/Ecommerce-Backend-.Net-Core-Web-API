@@ -1,6 +1,6 @@
 ﻿using AuthSystem.Models;
 using Stripe;
-namespace AuthSystem.Repository.Interfaces
+namespace AuthSystem.Repository.Interface
 {
     public interface IStripeRepository
     {

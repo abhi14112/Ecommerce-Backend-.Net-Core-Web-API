@@ -9,7 +9,7 @@ namespace AuthSystem.Data
             : base(options)
         {
         }
-
+        public DbSet<OrderModel> Orders { get; set; }
         public DbSet<CartItemModel> CartItems { get; set; }
         public DbSet<CartModel> Carts { get; set; }
         public DbSet<ProductModel> Products { get; set; }
@@ -37,6 +37,10 @@ namespace AuthSystem.Data
                 .WithOne(ci => ci.Profile)
                 .HasForeignKey<ProfileModel>(p => p.userId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrderModel>()
+           .Property(o => o.TotalAmount)
+           .HasColumnType("decimal(18,2)");
 
             base.OnModelCreating(modelBuilder);
         }

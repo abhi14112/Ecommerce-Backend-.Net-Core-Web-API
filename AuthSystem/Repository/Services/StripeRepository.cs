@@ -1,5 +1,5 @@
 ﻿using AuthSystem.Models;
-using AuthSystem.Repository.Interfaces;
+using AuthSystem.Repository.Interface;
 using Stripe;
 using Stripe.Checkout;
 namespace AuthSystem.Repository.Services
@@ -34,9 +34,10 @@ namespace AuthSystem.Repository.Services
                 Mode = "payment",
                 SuccessUrl = $"{domain}/success?session_id={{CHECKOUT_SESSION_ID}}",
                 CancelUrl = $"{domain}/failed",
-                Metadata = new Dictionary<string, string> 
+                Metadata = new Dictionary<string, string>
                 {
-                    {"product_ids", String.Join(',',checkoutItems.Select(i => i.ProductId))}
+                    {"product_ids", String.Join(',',checkoutItems.Select(i => i.ProductId))},
+                    {"quantities",String.Join(',',checkoutItems.Select(i => i.Quantity)) }
                 }
             };
             var service = new Stripe.Checkout.SessionService();
