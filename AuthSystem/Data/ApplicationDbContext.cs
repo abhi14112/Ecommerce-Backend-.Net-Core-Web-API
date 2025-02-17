@@ -15,6 +15,7 @@ namespace AuthSystem.Data
         public DbSet<ProductModel> Products { get; set; }
         public DbSet<UserModel> Users { get; set; }
         public DbSet<ProfileModel> Profiles { get; set; }
+        public DbSet<AddressModel> Addressess { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CartItemModel>()
@@ -41,6 +42,12 @@ namespace AuthSystem.Data
             modelBuilder.Entity<OrderModel>()
            .Property(o => o.TotalAmount)
            .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<AddressModel>()
+            .HasOne<UserModel>()
+            .WithMany(u => u.Addresses)
+            .HasForeignKey(u => u.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }

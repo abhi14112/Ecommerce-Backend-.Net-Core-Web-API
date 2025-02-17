@@ -1,4 +1,5 @@
-﻿using AuthSystem.DTOs;
+﻿using System.Security.Claims;
+using AuthSystem.DTOs;
 using AuthSystem.Models;
 using AuthSystem.Repository.Interface;
 using Microsoft.AspNetCore.Authorization;
@@ -18,9 +19,13 @@ public class AuthController : ControllerBase
 
     [HttpPost("Logout")]
     [Authorize]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
-        return Ok(new { message = "Logged out successfully" });
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var resData = await _authService.LogoutAsync(userId);
+
+        return Ok(new { message = resData});
     }
 
     [AllowAnonymous]

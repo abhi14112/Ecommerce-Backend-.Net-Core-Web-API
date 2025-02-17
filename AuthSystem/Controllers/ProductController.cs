@@ -21,7 +21,7 @@ namespace AuthSystem.Controllers
             var products = _productService.SearchProducts(searchkey);
             return Ok(products);
         }
-        [HttpGet]
+        [HttpGet("all")]
         [Authorize]
         public async Task<IActionResult>GetAllProducts()
         {

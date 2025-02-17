@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Microsoft.Identity.Client;
 namespace AuthSystem.Models
 {
     public class UserModel
@@ -37,5 +38,7 @@ namespace AuthSystem.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         [JsonIgnore]
         public ProfileModel? Profile { get; set; }
+
+        public ICollection<AddressModel> Addresses { get; set; } = new List<AddressModel>();
     }
 }

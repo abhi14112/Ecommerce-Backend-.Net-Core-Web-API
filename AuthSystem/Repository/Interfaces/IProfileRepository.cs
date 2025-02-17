@@ -1,4 +1,5 @@
-﻿using AuthSystem.Models;
+﻿using AuthSystem.DTOs;
+using AuthSystem.Models;
 namespace AuthSystem.Repository.Interface
 {
     public interface IProfileRepository
@@ -6,6 +7,8 @@ namespace AuthSystem.Repository.Interface
         Task<ProfileModel>GetProfileById(int id);
         Task<bool> PhoneExistsAsync(string phone);
         Task SaveChangesAsync();
+        Task<AddressModel> AddAddress(AddressDTO address, int userId);  
+        Task<ICollection<AddressDTO>> FindAddress(int userId);
     }
 
 }

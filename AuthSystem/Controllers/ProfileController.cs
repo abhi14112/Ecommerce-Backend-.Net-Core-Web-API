@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AuthSystem.Mappers;
 using AuthSystem.DTOs;
+using AuthSystem.Models;
+using System.Security.Claims;
+using Stripe;
 namespace AuthSystem.Controllers
 {
     [Route("api/[controller]")]
@@ -15,6 +18,25 @@ namespace AuthSystem.Controllers
         { 
             _profileService = profileRepository;
             _authService = authRepository;
+        }
+        
+        [HttpGet("GetAddress")]
+        [Authorize]
+        public async Task<IActionResult>GetAddress()
+        {
+            var userId1 = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = Convert.ToInt32(userId1);
+            var res = await _profileService.FindAddress(userId);
+            return Ok(res);
+        }
+        [HttpPost("CreateAddress")]
+        [Authorize]
+        public async Task<IActionResult>CreateAddress([FromBody]AddressDTO address)
+        {
+            var userId1 = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+           int userId = Convert.ToInt32(userId1);
+            var res = await _profileService.AddAddress(address,userId);
+            return Ok(res);
         }
         [HttpGet("{id}")]
         //[Authorize]

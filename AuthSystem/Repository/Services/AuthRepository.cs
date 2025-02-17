@@ -5,9 +5,11 @@ using AuthSystem.Data;
 using AuthSystem.DTOs;
 using AuthSystem.Models;
 using AuthSystem.Repository.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 namespace AuthSystem.Repository.Services
 {
 
@@ -15,14 +17,22 @@ namespace AuthSystem.Repository.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _config;
-        public AuthRepository(ApplicationDbContext context, IConfiguration config)
+        private readonly IConnectionMultiplexer _redis;
+        public AuthRepository(ApplicationDbContext context, IConfiguration config,IConnectionMultiplexer redis)
         {
             _context = context;
             _config = config;
+            _redis = redis;
         }
         public async Task<UserModel> GetUserAsync(int id)
         {
             return await _context.Users.FindAsync(id);
+        }
+        public async Task<string>LogoutAsync(string userId)
+        {
+            var db = _redis.GetDatabase();
+            await db.KeyDeleteAsync(userId);
+            return "Logged out";
         }
         public async Task<(UserModel, string)>Login(LoginDTO userData)
         {
@@ -31,6 +41,14 @@ namespace AuthSystem.Repository.Services
             {
                 var token = GenerateToken(user);
                 user.Password = "";
+                var db = _redis.GetDatabase();
+                var userId = user.Id.ToString();
+                var existingSession = await db.StringGetAsync(userId);
+                if (!string.IsNullOrEmpty(existingSession))
+                {
+                    await db.KeyDeleteAsync(userId);
+                }
+                await db.StringSetAsync(userId, token, TimeSpan.FromMinutes(30));
                 return (user, token);
             }
             return (null, null);
