@@ -2,6 +2,7 @@
 {
     public class AddressDTO
     {
+        public int Id { get; set; }
         public string AddressLine { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
         public string State { get; set; } = string.Empty;

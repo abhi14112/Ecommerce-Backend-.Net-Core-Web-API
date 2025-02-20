@@ -19,7 +19,14 @@ namespace AuthSystem.Controllers
             _profileService = profileRepository;
             _authService = authRepository;
         }
-        
+
+        [HttpDelete("DeleteAddress/{id}")]
+        [Authorize]
+        public async Task<IActionResult>DeleteAddress(int id)
+        {
+            await _profileService.DeleteAddressAsync(id);
+            return Ok("Address Deleted Successfully");
+        }
         [HttpGet("GetAddress")]
         [Authorize]
         public async Task<IActionResult>GetAddress()
@@ -57,7 +64,7 @@ namespace AuthSystem.Controllers
                 var user = await _authService.GetUserAsync(id);
                 if (profile == null)
                 {
-                    return NotFound(new { Message = "Product not found" });
+                    return NotFound(new { Message = "Profile not found" });
                 }
                 if (!String.IsNullOrEmpty(profileData.firstName)) 
                     user.FirstName = profileData.firstName;
@@ -66,19 +73,18 @@ namespace AuthSystem.Controllers
                 if(!String.IsNullOrEmpty(profileData.email))
                 {
                     
-                    bool isEmail = await _authService.EmailExistsAsync(profileData.email);
+                    bool isEmail = await _profileService.CheckEmailExistsAsync(profileData.email,id);
                     if (isEmail)
                     {
                         return BadRequest(new { message = "Email already exists" });
 
                     }
                     user.EmailAddress = profileData.email;
-
                 }
                     
                 if(!string.IsNullOrEmpty(profileData.phone))
                 {
-                    bool isPhone = await _profileService.PhoneExistsAsync(profileData.phone);
+                    bool isPhone = await _profileService.PhoneExistsAsync(profileData.phone,id);
                     if (isPhone)
                         return BadRequest(new { message = "Phone already Exists" });
 

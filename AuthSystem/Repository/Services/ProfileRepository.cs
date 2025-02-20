@@ -13,11 +13,21 @@ namespace AuthSystem.Repository.Services
         {
             _context = context;
         }
+        public async Task DeleteAddressAsync(int id)
+        {
+            var address = await _context.Addressess.FindAsync(id);
+            if (address != null)
+            {
+                _context.Addressess.Remove(address);
+                await _context.SaveChangesAsync();
+            }
+        }
         public async Task<ICollection<AddressDTO>>FindAddress(int userId)
         {
             var result = await _context.Addressess.Where((i)=>i.UserId == userId).ToListAsync();
             var addressDtos = result.Select(a => new AddressDTO
             {
+                Id = a.Id,
                 AddressLine = a.AddressLine,
                 City = a.City,
                 State = a.State,
@@ -46,9 +56,13 @@ namespace AuthSystem.Repository.Services
             var profile = await _context.Profiles.FindAsync(id);
             return profile;
         }
-        public async Task<bool> PhoneExistsAsync(string phone)
+        public async Task<bool> CheckEmailExistsAsync(string email, int id)
         {
-            return await _context.Profiles.AnyAsync(o => o.MobileNumber == phone);
+            return await _context.Users.AnyAsync(o => o.EmailAddress == email && o.Id != id);
+        }
+        public async Task<bool> PhoneExistsAsync(string phone,int id)
+        {
+            return await _context.Profiles.AnyAsync(o => o.MobileNumber == phone && o.userId !=id);
         }
         public async Task SaveChangesAsync()
         {
