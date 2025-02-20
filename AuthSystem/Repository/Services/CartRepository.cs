@@ -27,7 +27,7 @@ namespace AuthSystem.Repository.Services
         }
         public async Task UpdateCartItemQuantityAsync(CartItemModel cartItem, int quantity)
         {
-            cartItem.Quantity += quantity;
+            cartItem.Quantity = quantity;
             _context.Entry(cartItem).State = EntityState.Modified; 
         }
         public async Task RemoveCartItemAsync(CartItemModel cartItemModel)
