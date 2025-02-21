@@ -43,6 +43,6 @@ namespace AuthSystem.Repository.Services
             var service = new Stripe.Checkout.SessionService();
             Stripe.Checkout.Session session = await service.CreateAsync(options);
             return session.Url;
-            }
+        }
     }
 }

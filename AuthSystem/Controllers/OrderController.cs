@@ -19,5 +19,10 @@ namespace AuthSystem.Controllers
         {
             return await _orderService.GetCustomerOrders(email);
         }
+        [HttpGet("admin")]
+        public async Task<IEnumerable<AdminOrderResponseDto>> GetAdminOrdersAsync()
+        {
+            return await _orderService.GetAdminOrders();
+        }
     }
 }

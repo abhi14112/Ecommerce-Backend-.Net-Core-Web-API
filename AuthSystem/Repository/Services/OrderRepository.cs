@@ -14,6 +14,22 @@ namespace AuthSystem.Repository.Services
             _productService = productService;
             _context = context;
         }
+        public async Task<IEnumerable<AdminOrderResponseDto>> GetAdminOrders()
+        {
+            var orders = await _context.Orders
+                        .OrderByDescending(o => o.CreatedAt)
+                        .ToListAsync();
+            var orderDtos = orders.Select(o => new AdminOrderResponseDto
+            {
+                Id = o.Id,
+                TotalAmount = o.TotalAmount,
+                Items = o.ProductQuantity.Split(',').Select(int.Parse).Sum(),
+                PaymentStatus = o.PaymentStatus,
+                CreatedAt = o.CreatedAt,
+                OrderStatus = OrderStatus.Received.ToString()
+            });
+            return orderDtos;
+        }
         public async Task<IEnumerable<OrderResponseDto>> GetCustomerOrders(string email)
         {
             var orders = await _context.Orders

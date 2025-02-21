@@ -33,8 +33,6 @@ namespace AuthSystem.Controllers
             }
             var productsIds = session.Metadata.ContainsKey("product_ids") ? session.Metadata["product_ids"] : "Unknown";
             var productQuantities = session.Metadata.ContainsKey("quantities") ? session.Metadata["quantities"]:"Unknown";
-            Console.WriteLine(session);
-            Console.WriteLine("This is session data");
             var order = new OrderModel
             {
                 SessionId = session.Id,
