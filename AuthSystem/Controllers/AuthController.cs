@@ -16,7 +16,6 @@ public class AuthController : ControllerBase
         _config = config;
         _authService = authService;
     }
-
     [HttpPost("Logout")]
     [Authorize]
     public async Task<IActionResult> Logout()

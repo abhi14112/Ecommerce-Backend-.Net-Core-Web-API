@@ -91,7 +91,6 @@ namespace AuthSystem.Repository.Services
 
             return currentUser;
         }
-
         public string GenerateToken(UserModel user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
