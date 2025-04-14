@@ -1,12 +1,15 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using System.Security.Cryptography;
 using AuthSystem.Data;
 using AuthSystem.DTOs;
 using AuthSystem.Models;
 using AuthSystem.Repository.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
@@ -59,6 +62,8 @@ namespace AuthSystem.Repository.Services
         }
         public async Task<UserModel> SignupAsync(UserModel user)
         {
+            string password = PasswordHasher(user.Password);
+            user.Password = password;
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             var profile = new ProfileModel
@@ -81,15 +86,54 @@ namespace AuthSystem.Repository.Services
         {
             return await _context.Users.AnyAsync(o => o.EmailAddress.ToLower() == email.ToLower());
         }
-
+        public async Task<bool> MatchPassword(string userName, string password)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == userName.ToLower());
+            var hashedPassword = user.Password;
+            var currentHash = PasswordHasher(password);
+            if (hashedPassword != currentHash)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
         public async Task<UserModel> Authenticate(LoginDTO userData)
         {
             var currentUser = await _context.Users
                 .FirstOrDefaultAsync(u =>
-                    u.UserName.ToLower() == userData.Username.ToLower() &&
-                    u.Password == userData.Password);
+                    u.UserName.ToLower() == userData.Username.ToLower());
+            if (currentUser == null)
+            {
+                return null;
+            }
+            var isValid = await MatchPassword(userData.Username, userData.Password);
+            if(isValid)
+            {
+                return currentUser;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public string PasswordHasher(string password)
+        {
+            const int SaltSize = 16;
+            const int HashSize = 32;
+            const int Iterations = 1000;
+            HashAlgorithmName Algorithm = HashAlgorithmName.SHA512;
 
-            return currentUser;
+            //byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
+            byte[] salt = new byte[]
+                        {
+                        159, 12, 126, 82, 149, 167, 163, 78,
+                         31, 94, 43, 19, 168, 205, 27, 227
+                        };
+            byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, Algorithm, HashSize);
+            return $"{Convert.ToHexString(hash)}";
         }
         public string GenerateToken(UserModel user)
         {
