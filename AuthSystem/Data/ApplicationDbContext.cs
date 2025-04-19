@@ -1,6 +1,5 @@
 ﻿using AuthSystem.Models;
 using Microsoft.EntityFrameworkCore;
-
 namespace AuthSystem.Data
 {
     public class ApplicationDbContext : DbContext

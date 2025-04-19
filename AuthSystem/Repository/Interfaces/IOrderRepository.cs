@@ -5,5 +5,6 @@ namespace AuthSystem.Repository.Interface
     {
         Task<IEnumerable<OrderResponseDto>> GetCustomerOrders(string email);
         Task<IEnumerable<AdminOrderResponseDto>> GetAdminOrders();
+        Task UpdateOrderStatus(UpdateOrderStatusDto orderStatus);
     }
 }

@@ -19,6 +19,12 @@ namespace AuthSystem.Controllers
         {
             return await _orderService.GetCustomerOrders(email);
         }
+        [HttpPost("updateOrderStatus")]
+        public async Task<IActionResult> UpdateOrderStatus([FromBody] UpdateOrderStatusDto orderData)
+        {
+            await _orderService.UpdateOrderStatus(orderData);
+            return Ok("Order Status updated Successfully");
+        }
         [HttpGet("admin")]
         public async Task<IEnumerable<AdminOrderResponseDto>> GetAdminOrdersAsync()
         {

@@ -3,6 +3,7 @@ using AuthSystem.Models;
 using Stripe.Checkout;
 using AuthSystem.Repository.Interface;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace AuthSystem.Controllers
 {
@@ -22,6 +23,7 @@ namespace AuthSystem.Controllers
         {
             var service = new SessionService();
             var session = await service.GetAsync(sessionId);
+            Console.WriteLine(session.ToJson());
             if (session == null) 
             { 
                 return NotFound("Session not found");
@@ -31,7 +33,9 @@ namespace AuthSystem.Controllers
             {
                 return Ok(existingOrder);
             }
+            Console.WriteLine(session.Metadata);
             var productsIds = session.Metadata.ContainsKey("product_ids") ? session.Metadata["product_ids"] : "Unknown";
+            var address = session.Metadata.ContainsKey("address") ? session.Metadata["address"] : "Unknown";
             var productQuantities = session.Metadata.ContainsKey("quantities") ? session.Metadata["quantities"]:"Unknown";
             var order = new OrderModel
             {
@@ -41,7 +45,8 @@ namespace AuthSystem.Controllers
                 PaymentStatus = session.PaymentStatus,
                 CreatedAt = DateTime.UtcNow,
                 ProductId = productsIds,
-                ProductQuantity = productQuantities
+                ProductQuantity = productQuantities,
+                Address = address
             };
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
@@ -50,6 +55,11 @@ namespace AuthSystem.Controllers
         [HttpPost("create-payment-intent")]
         public async Task<IActionResult> CreatePaymentIntent([FromBody]List<CheckoutItemModel>checkoutItems)
         {
+            foreach (var item in checkoutItems) 
+            {
+                Console.Write(JsonConvert.SerializeObject(item));
+            }
+
             var sessionUrl = await _stripeService.CreateCheckoutSessionAsync(checkoutItems);
             return Ok(new {url = sessionUrl});
         }

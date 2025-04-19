@@ -29,7 +29,7 @@ namespace AuthSystem.Repository.Services
                         },
                         UnitAmount = (long)(item.Price * 100)
                     },
-                    Quantity = item.Quantity
+                    Quantity = item.Quantity,
                 }).ToList(),
                 Mode = "payment",
                 SuccessUrl = $"{domain}/success?session_id={{CHECKOUT_SESSION_ID}}",
@@ -37,7 +37,8 @@ namespace AuthSystem.Repository.Services
                 Metadata = new Dictionary<string, string>
                 {
                     {"product_ids", String.Join(',',checkoutItems.Select(i => i.ProductId))},
-                    {"quantities",String.Join(',',checkoutItems.Select(i => i.Quantity)) }
+                    {"quantities",String.Join(',',checkoutItems.Select(i => i.Quantity)) },
+                    {"address",checkoutItems.Select((i) => i.address).First().ToString()}
                 }
             };
             var service = new Stripe.Checkout.SessionService();

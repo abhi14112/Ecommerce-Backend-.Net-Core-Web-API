@@ -7,7 +7,6 @@ namespace AuthSystem.Models
     {
         [Key]
         public int Id { get; set; }
-
         public string? SessionId { get; set; }
         [Required]
         public string? CustomerEmail { get; set; }
@@ -20,5 +19,16 @@ namespace AuthSystem.Models
         public string? ProductId { get; set; }
         [Required]
         public string? ProductQuantity { get; set; }
+        public string Address { get; set; }
+        public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending;
+    }
+    public enum OrderStatus
+    {
+        Pending,
+        Processing,
+        Shipped,
+        Delivered,
+        Cancelled,
+        Returned
     }
 }

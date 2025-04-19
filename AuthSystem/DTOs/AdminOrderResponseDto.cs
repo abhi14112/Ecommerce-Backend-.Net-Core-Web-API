@@ -10,10 +10,4 @@
         public DateTime CreatedAt { get; set; }
         //public List<ProductDetailDto> Products { get; set; }
     }
-    public enum OrderStatus
-    {
-        Pending,
-        Canceled,
-        Received
-    }
 }
