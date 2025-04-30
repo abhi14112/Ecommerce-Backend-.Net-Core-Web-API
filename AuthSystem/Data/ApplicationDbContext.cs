@@ -15,6 +15,7 @@ namespace AuthSystem.Data
         public DbSet<UserModel> Users { get; set; }
         public DbSet<ProfileModel> Profiles { get; set; }
         public DbSet<AddressModel> Addressess { get; set; }
+        public DbSet<CategoryModel> Categories { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CartItemModel>()
