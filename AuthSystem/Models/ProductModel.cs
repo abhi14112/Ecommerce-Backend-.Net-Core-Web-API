@@ -23,7 +23,6 @@ namespace AuthSystem.Models
 
         [Required(ErrorMessage = "Category is required")]
         public string Category { get; set; }
-
         public int? CategoryModelId { get; set; }
         public CategoryModel CategoryModel { get; set; }
     }

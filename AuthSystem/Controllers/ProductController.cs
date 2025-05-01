@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using AuthSystem.Data;
 using AuthSystem.Models;
 using AuthSystem.Repository.Interface;
+using AuthSystem.DTOs;
 namespace AuthSystem.Controllers
 {
     [Route("api/[controller]")]
@@ -76,7 +77,7 @@ namespace AuthSystem.Controllers
         }
         [HttpPut("Update/{id}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductModel product)
+        public async Task<IActionResult> UpdateProduct(int id, [FromForm] UpdateProductDto product)
         {
             try
             {
@@ -104,6 +105,10 @@ namespace AuthSystem.Controllers
                 if (!string.IsNullOrEmpty(product.Category))
                 {
                     existingProduct.Category = product.Category;
+                }
+                if(product.CategoryModelId != 0)
+                {
+                    existingProduct.CategoryModelId = product.CategoryModelId;
                 }
                 await _productService.SaveChangesAsync();
                 return Ok(new { message = "Product Updated Successfully" });
